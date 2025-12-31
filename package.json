@@ -1,0 +1,63 @@
+{
+  "name": "handwrite-pro",
+  "version": "1.0.0",
+  "description": "Professional handwriting converter - transforms text into beautiful handwritten A4 sheets with premium cursive fonts",
+  "main": "index.html",
+  "author": "Your Name",
+  "license": "MIT",
+  "keywords": [
+    "handwriting",
+    "converter",
+    "cursive",
+    "A4",
+    "handwritten",
+    "text-to-handwriting",
+    "generator",
+    "fonts",
+    "assignment",
+    "notes"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/handwrite-pro.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/handwrite-pro/issues"
+  },
+  "homepage": "https://github.com/yourusername/handwrite-pro",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000",
+    "serve": "npx http-server"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "browserslist": [
+    "last 2 versions",
+    "> 1%",
+    "not dead"
+  ],
+  "features": [
+    "Premium cursive fonts (Great Vibes, Satisfy, Dancing Script, Caveat, Pacifico)",
+    "Real-time live preview",
+    "Professional A4 layout with ruled lines and margins",
+    "Natural handwriting variations",
+    "Authentic aged paper texture",
+    "Multiple export formats (PNG, JPG, WebP)",
+    "Responsive design for mobile/tablet/desktop",
+    "Zero dependencies - pure HTML/CSS/JavaScript",
+    "Fast performance and smooth animations",
+    "Customizable pen color, font size, and natural flow"
+  ],
+  "tags": [
+    "web-app",
+    "handwriting",
+    "generator",
+    "html5",
+    "canvas",
+    "javascript"
+  ]
+}

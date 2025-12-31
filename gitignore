@@ -1,0 +1,77 @@
+# Git ignore rules for HandWrite Pro
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# Node (if added later)
+node_modules/
+package-lock.json
+npm-debug.log
+
+# Build artifacts
+dist/
+build/
+*.zip
+*.tar.gz
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Cache
+.cache/
+*.cache
+
+# OS specific
+*.exe
+*.app
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Python (if using local server)
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+env/
+venv/
+ENV/
+
+# Dependencies if added
+bower_components/
+jspm_packages/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Keep these files
+!index.html
+!README.md
+!LICENSE
+!package.json
+!.gitignore
