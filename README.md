@@ -24,3 +24,9 @@ Notes
 
 - The script uses `pywhatkit.text_to_handwriting` where available for realistic handwriting. If `pywhatkit` is missing or fails, it falls back to a PIL-based renderer that uses system fonts and per-character jitter to emulate handwriting.
 - On Windows, installing a handwriting font (e.g., "Segoe Script", "Bradley Hand") and passing `--font PATH_TO_TTF` improves realism.
+ - Improvements included: word-wrapping, per-character rotation, simulated ink thickness, and a light paper texture in the fallback renderer.
+ - Example (quick test):
+
+```powershell
+python file.py --text "Hello\nThis is a handwriting test." --output sample_output.png
+```
