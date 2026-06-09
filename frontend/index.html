@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HandWrite Pro - AI Powered</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="bg-gradient">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <div class="vibe-toast" id="vibeToast">
+        <div class="vibe-icon">✨</div>
+        <div class="vibe-text">
+            <h4 id="vibeTitle">AI Auto-Styler Applied</h4>
+            <p id="vibeDesc">Analyzed vibe: Creative</p>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <div class="brand-icon">✍️</div>
+                    <h1>HandWrite Pro</h1>
+                </div>
+                <div class="tagline">ML-Powered Handwriting Generator</div>
+            </div>
+
+            <div class="controls-body">
+                <div class="form-group">
+                    <label class="form-label">📝 Your Text</label>
+                    <textarea id="textInput" placeholder="Paste or type your text here. Let AI decide the best style, or customize it yourself!"></textarea>
+                </div>
+
+                <button class="ai-btn" id="aiBtn" onclick="analyzeAndStyle()">
+                    <i data-lucide="sparkles"></i> Auto-Style with AI
+                </button>
+
+                <div class="form-group">
+                    <label class="form-label">🎨 Handwriting Style</label>
+                    <select id="fontSelect">
+                        <option value="Great Vibes">Great Vibes (Formal/Elegant)</option>
+                        <option value="Satisfy">Satisfy (Casual/Smooth)</option>
+                        <option value="Dancing Script">Dancing Script (Creative)</option>
+                        <option value="Caveat">Caveat (Urgent/Bold)</option>
+                        <option value="Pacifico">Pacifico (Modern)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">🖊️ Pen Color</label>
+                    <div class="color-options">
+                        <div class="color-opt active" data-color="#1a1a1a" onclick="setPenColor(this, '#1a1a1a')">
+                            <div class="color-swatch" style="background: #1a1a1a"></div>
+                            Black
+                        </div>
+                        <div class="color-opt" data-color="#0a3d91" onclick="setPenColor(this, '#0a3d91')">
+                            <div class="color-swatch" style="background: #0a3d91"></div>
+                            Blue
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">📏 Font Size</label>
+                    <div class="slider-row">
+                        <input type="range" id="fontSize" min="20" max="60" value="32" step="2" oninput="updateVal('fontSize', 'fontSizeVal')">
+                        <span class="val-badge" id="fontSizeVal">32</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">~ Natural Flow</label>
+                    <div class="slider-row">
+                        <input type="range" id="variation" min="1" max="10" value="7" step="1" oninput="updateVal('variation', 'variationVal')">
+                        <span class="val-badge" id="variationVal">7</span>
+                    </div>
+                </div>
+
+                <div class="action-grid">
+                    <button class="btn-primary" onclick="generateHandwriting()">
+                        <i data-lucide="pen-tool"></i> Generate
+                    </button>
+                    <button class="btn-secondary" id="downloadBtn" onclick="downloadImage()" disabled>
+                        <i data-lucide="download"></i> Download
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="preview-area">
+            <div class="canvas-container">
+                <canvas id="canvas" width="800" height="1130"></canvas>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
