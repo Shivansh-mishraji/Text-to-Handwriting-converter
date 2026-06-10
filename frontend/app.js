@@ -1,196 +1,211 @@
-let currentPenColor = '#1a1a1a';
-let canvasHasContent = false;
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d', { willReadFrequently: true });
+const API_URL = "/api/analyze-text";
+let canvas, ctx;
+let currentVibe = null;
 
-lucide.createIcons();
+document.addEventListener("DOMContentLoaded", () => {
+    lucide.createIcons();
+    canvas = document.getElementById("canvas");
+    ctx = canvas.getContext("2d");
+    
+    // Initial draw to show paper background
+    drawPaperBackground();
+});
 
-function updateVal(id, labelId) {
-    document.getElementById(labelId).textContent = document.getElementById(id).value;
+function drawPaperBackground() {
+    // Fill off-white paper
+    ctx.fillStyle = "#faf5f0";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw ruled lines
+    ctx.strokeStyle = "rgba(0, 150, 255, 0.15)";
+    ctx.lineWidth = 1;
+    
+    for (let y = 100; y < canvas.height; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+    }
+    
+    // Margin line
+    ctx.strokeStyle = "rgba(255, 0, 0, 0.2)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(80, 0);
+    ctx.lineTo(80, canvas.height);
+    ctx.stroke();
 }
 
-function setPenColor(element, color) {
-    document.querySelectorAll('.color-opt').forEach(el => el.classList.remove('active'));
-    element.classList.add('active');
-    currentPenColor = color;
-}
-
-function showToast(vibe) {
-    const toast = document.getElementById('vibeToast');
-    document.getElementById('vibeDesc').textContent = `Analyzed vibe: ${vibe}`;
-    toast.classList.add('show');
-    setTimeout(() => { toast.classList.remove('show'); }, 4000);
-}
-
-// ── MLOps AI Integration ────────────────────────────────────────────────────
 async function analyzeAndStyle() {
-    const text = document.getElementById('textInput').value;
+    const text = document.getElementById("textInput").value;
+    const btn = document.getElementById("aiBtn");
+    
     if (!text.trim()) {
-        alert("Please enter text before using the Auto-Styler!");
+        showToast("Please enter some text first!", "warning");
         return;
     }
-
-    const btn = document.getElementById('aiBtn');
-    const originalText = btn.innerHTML;
-    btn.classList.add('loading');
-    btn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Analyzing...';
+    
+    btn.classList.add("loading");
+    btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin"></i> Analyzing...`;
     lucide.createIcons();
-
+    
     try {
-        const res = await fetch('/api/analyze-text', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text })
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: text })
         });
         
-        if (!res.ok) throw new Error('Network response was not ok');
-        const data = await res.json();
+        if (!response.ok) throw new Error("API Error");
         
-        // Apply ML Recommendations
-        document.getElementById('fontSelect').value = data.font;
-        document.getElementById('variation').value = data.flow;
-        updateVal('variation', 'variationVal');
-        document.getElementById('fontSize').value = data.size;
-        updateVal('fontSize', 'fontSizeVal');
+        const data = await response.json();
         
-        // Set Color
-        const colorOpts = document.querySelectorAll('.color-opt');
-        colorOpts.forEach(el => {
-            if (el.dataset.color === data.color) {
-                setPenColor(el, data.color);
+        // Update UI
+        document.getElementById("fontSelect").value = data.font;
+        document.getElementById("fontSize").value = data.size;
+        document.getElementById("fontSizeVal").textContent = data.size;
+        document.getElementById("variation").value = data.flow;
+        document.getElementById("variationVal").textContent = data.flow;
+        
+        // Update color
+        document.querySelectorAll(".color-opt").forEach(opt => {
+            if (opt.dataset.color === data.color) {
+                opt.classList.add("active");
+            } else {
+                opt.classList.remove("active");
             }
         });
-
-        showToast(data.vibe);
         
-        // Auto-generate
-        setTimeout(generateHandwriting, 500);
-
-    } catch (err) {
-        console.error(err);
-        alert('Failed to connect to the ML service.');
+        showToast(`AI Auto-Styler Applied! Vibe: ${data.vibe}`, "success");
+        currentVibe = data.vibe;
+        
+        // Auto generate
+        generateHandwriting(data.color);
+        
+    } catch (error) {
+        console.error("Error:", error);
+        showToast("Failed to connect to AI engine.", "error");
     } finally {
-        btn.classList.remove('loading');
-        btn.innerHTML = originalText;
+        btn.classList.remove("loading");
+        btn.innerHTML = `<i data-lucide="sparkles"></i> Auto-Style with AI`;
         lucide.createIcons();
     }
 }
 
-// ── Canvas Generation logic ─────────────────────────────────────────────────
-function random(min, max) { return Math.random() * (max - min) + min; }
-
-function drawChar(char, x, y, fontSize, fontFamily, color, variation) {
-    ctx.save();
-    const tilt = random(-0.02, 0.02) * (variation * 0.5);
-    const yWobble = random(-1.5, 1.5) * (variation * 0.3);
-    const xWobble = random(-0.8, 0.8) * (variation * 0.2);
-    const opacity = random(0.88, 0.98);
-    const scale = 0.998 + random(-0.005, 0.005);
-
-    ctx.translate(x + xWobble, y + yWobble);
-    ctx.rotate(tilt);
-    ctx.scale(scale, 1);
-    ctx.translate(-(x + xWobble), -(y + yWobble));
-
-    ctx.fillStyle = color;
-    ctx.globalAlpha = opacity * 0.1;
-    ctx.font = `${fontSize}px "${fontFamily}"`;
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    ctx.fillText(char, x + xWobble + 0.5, y + yWobble + 0.5);
-
-    ctx.globalAlpha = opacity;
-    ctx.fillText(char, x + xWobble, y + yWobble);
-    ctx.restore();
+function updateVal(inputId, displayId) {
+    document.getElementById(displayId).textContent = document.getElementById(inputId).value;
 }
 
-async function generateHandwriting() {
-    const text = document.getElementById('textInput').value;
-    if (!text.trim()) return;
-
-    const fontFamily = document.getElementById('fontSelect').value;
-    const fontSize = parseInt(document.getElementById('fontSize').value);
-    const variation = parseInt(document.getElementById('variation').value);
-
-    await document.fonts.ready;
-
-    // Canvas background
-    ctx.fillStyle = '#faf5f0';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Subtle texture
-    for (let i = 0; i < canvas.width; i += 8) {
-        for (let j = 0; j < canvas.height; j += 8) {
-            ctx.fillStyle = `rgba(0,0,0,${random(0.004, 0.012)})`;
-            ctx.fillRect(i + random(-1, 1), j + random(-1, 1), random(2, 4), random(2, 4));
-        }
+function setPenColor(element, color) {
+    document.querySelectorAll(".color-opt").forEach(opt => opt.classList.remove("active"));
+    element.classList.add("active");
+    // Generate immediately if text exists
+    if (document.getElementById("textInput").value.trim()) {
+        generateHandwriting(color);
     }
+}
 
-    // Ruled lines
-    ctx.strokeStyle = '#d4d4d4';
-    ctx.lineWidth = 0.8;
-    const lineSpacing = fontSize * 2.3;
-    for (let y = 110; y < canvas.height - 60; y += lineSpacing) {
-        ctx.globalAlpha = random(0.4, 0.6);
-        ctx.beginPath(); ctx.moveTo(65, y); ctx.lineTo(canvas.width - 65, y); ctx.stroke();
+function getActiveColor() {
+    const activeOpt = document.querySelector(".color-opt.active");
+    return activeOpt ? activeOpt.dataset.color : "#1a1a1a";
+}
+
+function wrapText(context, text, x, y, maxWidth, lineHeight, flowVariation) {
+    const paragraphs = text.split('\n');
+    let currentY = y;
+    
+    for (let p = 0; p < paragraphs.length; p++) {
+        let words = paragraphs[p].split(' ');
+        let line = '';
+        
+        for (let n = 0; n < words.length; n++) {
+            let testLine = line + words[n] + ' ';
+            let metrics = context.measureText(testLine);
+            let testWidth = metrics.width;
+            
+            if (testWidth > maxWidth && n > 0) {
+                // Apply subtle random offset for natural flow
+                let yOffset = (Math.random() - 0.5) * flowVariation;
+                context.fillText(line, x, currentY + yOffset);
+                line = words[n] + ' ';
+                currentY += lineHeight;
+            } else {
+                line = testLine;
+            }
+        }
+        let yOffset = (Math.random() - 0.5) * flowVariation;
+        context.fillText(line, x, currentY + yOffset);
+        currentY += lineHeight * 1.5; // Paragraph spacing
     }
-    ctx.globalAlpha = 1.0;
+}
 
-    // Margins
-    ctx.strokeStyle = '#b8b8b8'; ctx.lineWidth = 1.3;
-    ctx.beginPath(); ctx.moveTo(65, 50); ctx.lineTo(65, canvas.height - 50); ctx.stroke();
-    ctx.strokeStyle = '#d97777'; ctx.lineWidth = 0.7; ctx.globalAlpha = 0.5;
-    ctx.beginPath(); ctx.moveTo(62, 50); ctx.lineTo(62, canvas.height - 50); ctx.stroke();
-    ctx.globalAlpha = 1.0;
-
-    // Text rendering
-    const margin = 85;
-    const lineHeight = fontSize * 2.4;
-    let y = margin + fontSize;
-    let x = margin;
-
-    ctx.font = `${fontSize}px "${fontFamily}"`;
-    const words = text.split(' ');
-
-    for (let wordIdx = 0; wordIdx < words.length; wordIdx++) {
-        const word = words[wordIdx];
-        let wordWidth = 0;
-        for (let char of word) {
-            wordWidth += ctx.measureText(char).width + random(0.1, 0.5) * (variation * 0.2);
-        }
-
-        if (x !== margin && x + wordWidth > canvas.width - margin) {
-            x = margin;
-            y += lineHeight;
-            if (y > canvas.height - 80) break;
-        }
-
-        for (let i = 0; i < word.length; i++) {
-            if (y > canvas.height - 80) break;
-            const char = word[i];
-            drawChar(char, x, y, fontSize, fontFamily, currentPenColor, variation);
-            x += ctx.measureText(char).width + random(0.1, 0.8) * (variation * 0.25);
-        }
-
-        if (wordIdx < words.length - 1) {
-            x += ctx.measureText(' ').width * 0.7 + random(-0.5, 1.5) * (variation * 0.15);
-        }
-
-        if (x > canvas.width - margin) {
-            x = margin;
-            y += lineHeight;
-            if (y > canvas.height - 80) break;
-        }
+function generateHandwriting(overrideColor = null) {
+    const text = document.getElementById("textInput").value;
+    if (!text.trim()) {
+        showToast("Please enter some text to generate handwriting.", "warning");
+        return;
     }
-
-    canvasHasContent = true;
-    document.getElementById('downloadBtn').disabled = false;
+    
+    drawPaperBackground();
+    
+    const fontName = document.getElementById("fontSelect").value;
+    const fontSize = parseInt(document.getElementById("fontSize").value);
+    const color = overrideColor || getActiveColor();
+    const flow = parseInt(document.getElementById("variation").value);
+    
+    ctx.font = `${fontSize}px "${fontName}", cursive`;
+    ctx.fillStyle = color;
+    
+    // Add subtle shadow for ink bleed effect
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 0.5;
+    ctx.shadowOffsetX = 0.2;
+    ctx.shadowOffsetY = 0.2;
+    
+    const startX = 100; // After margin
+    const startY = 90; // Align with first ruled line
+    const maxWidth = canvas.width - startX - 40;
+    
+    // Line height closely matches the ruled lines (40px)
+    const lineHeight = 40; 
+    
+    wrapText(ctx, text, startX, startY, maxWidth, lineHeight, flow);
+    
+    // Enable download
+    const dlBtn = document.getElementById("downloadBtn");
+    dlBtn.disabled = false;
+    dlBtn.classList.remove("btn-secondary");
+    dlBtn.classList.add("btn-primary");
 }
 
 function downloadImage() {
-    if (!canvasHasContent) return;
     const link = document.createElement('a');
-    link.download = `Handwritten-Pro.png`;
-    link.href = canvas.toDataURL('image/png', 1.0);
+    link.download = 'handwriting.png';
+    link.href = canvas.toDataURL('image/png');
     link.click();
+}
+
+function showToast(message, type) {
+    const toast = document.getElementById("vibeToast");
+    const title = document.getElementById("vibeTitle");
+    const desc = document.getElementById("vibeDesc");
+    
+    toast.style.borderColor = type === 'error' ? 'var(--danger)' : 'var(--accent)';
+    
+    if (type === 'success') {
+        title.textContent = "AI Auto-Styler Applied";
+        desc.textContent = message;
+    } else if (type === 'warning') {
+        title.textContent = "Attention Needed";
+        desc.textContent = message;
+    } else {
+        title.textContent = "Error";
+        desc.textContent = message;
+    }
+    
+    toast.classList.add("show");
+    
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 4000);
 }
