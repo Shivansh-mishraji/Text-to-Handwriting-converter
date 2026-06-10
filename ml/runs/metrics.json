@@ -1,0 +1,19 @@
+{
+    "timestamp": "2026-06-10T15:15:02.944989",
+    "best_params": {
+        "clf__max_depth": 10,
+        "clf__n_estimators": 50,
+        "tfidf__max_features": 1000,
+        "tfidf__ngram_range": [
+            1,
+            1
+        ]
+    },
+    "test_accuracy": 0.4375,
+    "classes": [
+        "Casual",
+        "Creative",
+        "Formal",
+        "Urgent"
+    ]
+}
