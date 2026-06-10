@@ -83,8 +83,9 @@ async function analyzeAndStyle() {
         generateHandwriting(data.color);
         
     } catch (error) {
-        console.error("Error:", error);
-        showToast("Failed to connect to AI engine.", "error");
+        console.error("API Error (Likely running as static site):", error);
+        showToast("Static Mode: Defaulting to standard style", "warning");
+        generateHandwriting();
     } finally {
         btn.classList.remove("loading");
         btn.innerHTML = `<i data-lucide="sparkles"></i> Auto-Style with AI`;

@@ -1,7 +1,6 @@
 import os
 import logging
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from api.routes import router as api_router
 
@@ -18,16 +17,17 @@ app = FastAPI(
 # Include Modularized API Routes
 app.include_router(api_router, prefix="/api", tags=["Analysis"])
 
-# Serve Frontend Static Files
-os.makedirs("frontend", exist_ok=True)
-app.mount("/static", StaticFiles(directory="frontend"), name="static")
-
 @app.get("/")
 def read_root():
-    index_path = os.path.join("frontend", "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
-    return {"message": "Frontend not found"}
+    return FileResponse("index.html")
+
+@app.get("/style.css")
+def get_style():
+    return FileResponse("style.css")
+
+@app.get("/app.js")
+def get_app():
+    return FileResponse("app.js")
 
 if __name__ == "__main__":
     import uvicorn
